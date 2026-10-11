@@ -1,0 +1,14 @@
+$kind: http-request
+description: Kiểm tra query available_only=true; các lớp hết chỗ như DM-01 bị loại theo dữ liệu demo.
+url: "{{base_url}}/sections?available_only=true"
+method: GET
+queryParams:
+  available_only: "true"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+    language: text/javascript
+order: 3000

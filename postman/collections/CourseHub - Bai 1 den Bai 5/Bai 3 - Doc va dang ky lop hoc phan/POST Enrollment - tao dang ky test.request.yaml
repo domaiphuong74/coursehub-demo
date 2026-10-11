@@ -1,0 +1,21 @@
+$kind: http-request
+description: Tạo đăng ký test cho Hoàng Nam. Chạy trước request POST trùng, sau đó chạy DELETE dọn dữ liệu. Nếu chạy lại sau khi tạo mà chưa dọn, request có thể trả 409.
+url: "{{base_url}}/enrollments"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "student_id": "22000004",
+      "class_section_id": "WEB-01"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 201", function () {
+          pm.response.to.have.status(201);
+      });
+    language: text/javascript
+order: 4000

@@ -1,0 +1,12 @@
+$kind: http-request
+description: Kiểm tra FastAPI và kết nối PostgreSQL. Mong đợi 200.
+url: "{{base_url}}/health"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+    language: text/javascript
+order: 1000

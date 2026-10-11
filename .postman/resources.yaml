@@ -2,9 +2,12 @@
 workspace:
   id: 1fcbc08f-cc6f-42bc-8908-cd7679d15934
 
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
 cloudResources:
   collections:
     ../postman/collections/CourseHub API - Buoi 3 Copy: 19755f24-292f-4c13-b6fd-4b05f467e3f3
+    ../postman/collections/CourseHub - Bai 1 den Bai 5: fcb12b6a-9715-4e80-b18d-823293ba8af7
 
 # All resources in the `postman/` folder are automatically registered in Local View.
 # Point to additional files outside the `postman/` folder to register them individually. Example:

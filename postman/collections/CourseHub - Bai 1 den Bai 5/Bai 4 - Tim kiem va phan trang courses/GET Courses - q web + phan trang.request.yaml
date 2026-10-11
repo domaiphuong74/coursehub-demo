@@ -1,0 +1,16 @@
+$kind: http-request
+description: "Bài 4: kết hợp tìm kiếm và phân trang."
+url: "{{base_url}}/courses?q=web&skip=0&limit=2"
+method: GET
+queryParams:
+  q: web
+  skip: "0"
+  limit: "2"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+    language: text/javascript
+order: 4000

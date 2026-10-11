@@ -1,0 +1,12 @@
+$kind: http-request
+description: "Bài 2: trường hợp lỗi, mã lớp không tồn tại phải trả 404."
+url: "{{base_url}}/sections/NO-SUCH-SECTION"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 404", function () {
+          pm.response.to.have.status(404);
+      });
+    language: text/javascript
+order: 2000

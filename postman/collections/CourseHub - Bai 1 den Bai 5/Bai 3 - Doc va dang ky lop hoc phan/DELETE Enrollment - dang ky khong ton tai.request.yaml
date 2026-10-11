@@ -1,0 +1,12 @@
+$kind: http-request
+description: "Trường hợp lỗi: không có đăng ký tương ứng, mong đợi 404."
+url: "{{base_url}}/enrollments/99999999/NO-SUCH-SECTION"
+method: DELETE
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 404", function () {
+          pm.response.to.have.status(404);
+      });
+    language: text/javascript
+order: 8000

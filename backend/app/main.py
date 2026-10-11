@@ -256,3 +256,162 @@ def delete_enrollment(student_id: str, class_section_id: str) -> Response:
             )
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+@app.get("/lecturers")
+def list_lecturers() -> list[dict[str, object]]:
+    sql = """
+        SELECT id, name
+        FROM lecturers
+        ORDER BY id
+    """
+
+    with engine.connect() as connection:
+        rows = connection.execute(text(sql)).mappings().all()
+
+    return [dict(row) for row in rows]
+
+
+from pydantic import BaseModel, Field
+class CapacityUpdate(BaseModel):
+    capacity: int = Field(gt=0, strict=True)
+@app.get("/sections/{section_id}")
+def get_section_detail(section_id: str):
+    sql = text("""
+        SELECT
+            cs.id AS section_id,
+            c.code AS course_code,
+            c.name AS course_name,
+            sem.code AS semester_code,
+            sem.name AS semester_name,
+            l.name AS lecturer_name,
+            v.capacity AS capacity,
+            v.enrolled AS enrolled,
+            v.remaining AS remaining
+        FROM class_sections AS cs
+        JOIN courses AS c
+            ON c.code = cs.course_code
+        JOIN semesters AS sem
+            ON sem.code = cs.semester_code
+        JOIN lecturers AS l
+            ON l.id = cs.lecturer_id
+        JOIN v_section_summary AS v
+            ON v.class_id = cs.id
+        WHERE cs.id = :section_id
+    """)
+
+    with engine.connect() as connection:
+        result = connection.execute(
+            sql,
+            {"section_id": section_id}
+        ).mappings().first()
+
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Khong tim thay lop hoc phan"
+        )
+
+    return dict(result)
+
+@app.patch("/sections/{section_id}/capacity")
+def update_section_capacity(
+    section_id: str,
+    payload: CapacityUpdate,
+):
+    with engine.begin() as connection:
+        # Kiểm tra lớp học phần có tồn tại không
+        check_sql = text("""
+            SELECT
+                cs.id AS section_id,
+                v.enrolled AS enrolled
+            FROM class_sections AS cs
+            JOIN v_section_summary AS v
+                ON v.class_id = cs.id
+            WHERE cs.id = :section_id
+        """)
+
+        section = connection.execute(
+            check_sql,
+            {"section_id": section_id}
+        ).mappings().first()
+
+        if section is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Khong tim thay lop hoc phan"
+            )
+
+        new_capacity = payload.capacity
+        enrolled = section["enrolled"]
+
+        # Không cho sức chứa nhỏ hơn số đã đăng ký
+        if new_capacity < enrolled:
+            raise HTTPException(
+                status_code=409,
+                detail="Capacity khong duoc nho hon so sinh vien da dang ky"
+            )
+
+        # Cập nhật sức chứa
+        update_sql = text("""
+            UPDATE class_sections
+            SET capacity = :capacity
+            WHERE id = :section_id
+        """)
+
+        connection.execute(
+            update_sql,
+            {
+                "capacity": new_capacity,
+                "section_id": section_id
+            }
+        )
+
+    return {
+        "section_id": section_id,
+        "capacity": new_capacity,
+        "enrolled": enrolled,
+        "remaining": new_capacity - enrolled
+    }
+
+
+@app.get("/courses")
+def list_courses(
+    q: str | None = Query(default=None, min_length=1),
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=100),
+) -> list[dict[str, object]]:
+    sql = """
+        SELECT code, name, credits
+        FROM courses
+    """
+    parameters: dict[str, object] = {}
+
+    if q is not None:
+        keyword = q.strip().lower()
+
+        if not keyword:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Tu khoa tim kiem khong duoc rong",
+            )
+
+        sql += """
+            WHERE LOWER(code) LIKE :keyword
+               OR LOWER(name) LIKE :keyword
+        """
+        parameters["keyword"] = f"%{keyword}%"
+
+    # Sap xep on dinh truoc khi phan trang
+    sql += " ORDER BY code"
+
+    # Bo qua skip ban ghi, lay toi da limit ban ghi
+    sql += " OFFSET :skip LIMIT :limit"
+    parameters["skip"] = skip
+    parameters["limit"] = limit
+
+    with engine.connect() as connection:
+        rows = connection.execute(
+            text(sql), parameters
+        ).mappings().all()
+
+    return [dict(row) for row in rows]

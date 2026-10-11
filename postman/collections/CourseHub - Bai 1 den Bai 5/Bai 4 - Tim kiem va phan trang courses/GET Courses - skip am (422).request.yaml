@@ -1,0 +1,14 @@
+$kind: http-request
+description: "Bài 4: skip không được âm."
+url: "{{base_url}}/courses?skip=-1"
+method: GET
+queryParams:
+  skip: "-1"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 422", function () {
+          pm.response.to.have.status(422);
+      });
+    language: text/javascript
+order: 5000

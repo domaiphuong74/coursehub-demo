@@ -1,0 +1,14 @@
+$kind: http-request
+description: "Bài 4: limit không được lớn hơn 100."
+url: "{{base_url}}/courses?limit=101"
+method: GET
+queryParams:
+  limit: "101"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 422", function () {
+          pm.response.to.have.status(422);
+      });
+    language: text/javascript
+order: 7000
