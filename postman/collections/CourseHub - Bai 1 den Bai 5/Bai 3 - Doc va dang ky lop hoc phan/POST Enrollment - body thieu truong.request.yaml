@@ -1,0 +1,20 @@
+$kind: http-request
+description: "Trường hợp lỗi: thiếu class_section_id, mong đợi 422."
+url: "{{base_url}}/enrollments"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "student_id": "22000004"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 422", function () {
+          pm.response.to.have.status(422);
+      });
+    language: text/javascript
+order: 6000

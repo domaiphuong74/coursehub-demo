@@ -1,0 +1,21 @@
+$kind: http-request
+description: Chạy sau request tạo đăng ký thành công; cùng cặp student_id/class_section_id phải trả 409.
+url: "{{base_url}}/enrollments"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "student_id": "22000004",
+      "class_section_id": "WEB-01"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 409", function () {
+          pm.response.to.have.status(409);
+      });
+    language: text/javascript
+order: 5000

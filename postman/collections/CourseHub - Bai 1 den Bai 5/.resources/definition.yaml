@@ -1,0 +1,4 @@
+$kind: collection
+description: "Collection mẫu cho bài tự thực hành CourseHub Buổi 3. Trước khi chạy, kiểm tra API có các endpoint tương ứng và PostgreSQL đã được seed. Luồng dữ liệu đăng ký: POST Enrollment - tao dang ky test -> POST Enrollment - trung dang ky -> DELETE Enrollment - don du lieu test. Request tạo đăng ký dùng student_id=22000004, class_section_id=WEB-01 theo bộ dữ liệu minh họa của tài liệu."
+variables:
+  base_url: http://127.0.0.1:8000

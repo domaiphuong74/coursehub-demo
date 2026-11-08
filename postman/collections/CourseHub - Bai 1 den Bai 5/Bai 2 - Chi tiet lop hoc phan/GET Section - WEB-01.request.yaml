@@ -1,0 +1,12 @@
+$kind: http-request
+description: "Bài 2: xem chi tiết lớp học phần. Mong đợi có mã lớp, học phần, học kỳ, giảng viên, capacity, enrolled, remaining."
+url: "{{base_url}}/sections/WEB-01"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status code is 200", function () {
+          pm.response.to.have.status(200);
+      });
+    language: text/javascript
+order: 1000
